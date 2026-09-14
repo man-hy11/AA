@@ -1,0 +1,140 @@
+@startuml seq1_region_policy_and_voucher_purchase
+title 지역 정책 확인 - 상품권 잔액 확인 - 추가 구매
+
+skinparam style strictuml
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam BoxPadding 12
+skinparam defaultFontName Malgun Gothic
+autonumber
+
+actor "사용자" as User
+participant ":UserService" as UserService <<component>>
+participant ":SearchService" as SearchService <<component>>
+participant ":VoucherService" as VoucherService <<component>>
+participant ":EventBus" as EventBus <<component>>
+participant ":ManagerSystem" as ManagerSystem <<component>>
+participant ":PaymentService" as PaymentService <<component>>
+database "DataBase" as DB <<database>>
+actor "금융 시스템" as FinancialSystem
+
+== 1. 지역 선택 및 지역 정책 확인 ==
+User -> UserService : 지역 정책 확인 (지역 선택)
+activate UserService
+UserService -> SearchService : 지역 정책 요청
+activate SearchService
+deactivate UserService
+SearchService -> EventBus : 지역 정책 요청
+activate EventBus
+deactivate SearchService
+EventBus -> ManagerSystem : 지역 정책 요청
+deactivate EventBus
+activate ManagerSystem
+ManagerSystem -> DB : 지역 정책 요청
+activate DB
+deactivate ManagerSystem
+DB -->> ManagerSystem : 지역 정책 반환
+activate ManagerSystem
+deactivate DB
+ManagerSystem -->> EventBus : 지역 정책 반환
+deactivate ManagerSystem
+activate EventBus
+EventBus -->> SearchService : 지역 정책 반환
+activate SearchService
+deactivate EventBus
+SearchService -->> UserService : 지역 정책 반환
+activate UserService
+deactivate SearchService
+UserService -->> User : 정책 화면 표시
+deactivate UserService
+
+== 2. 지역 상품권 잔액 확인 ==
+User -> UserService : 상품권 잔액 확인
+activate UserService
+UserService -> VoucherService : 상품권 잔액 요청
+deactivate UserService
+activate VoucherService
+VoucherService -> EventBus : 상품권 잔액 요청
+deactivate VoucherService
+activate EventBus
+EventBus -> ManagerSystem : 상품권 잔액 요청
+deactivate EventBus
+activate ManagerSystem
+ManagerSystem -> DB : 잔액 정보 요청
+activate DB
+deactivate ManagerSystem
+DB -->> ManagerSystem : 잔액 반환
+activate ManagerSystem
+deactivate DB
+ManagerSystem -->> EventBus : 잔액 반환
+deactivate ManagerSystem
+activate EventBus
+EventBus -->> VoucherService : 잔액 반환
+activate VoucherService
+deactivate EventBus
+VoucherService -->> UserService : 잔액 반환
+activate UserService
+deactivate VoucherService
+UserService -->> User : 잔액 표시
+deactivate UserService
+
+== 3. 상품권 추가 구매 ==
+User -> UserService : 추가 구매 요청 (금액, 결제수단)
+activate UserService
+UserService -> VoucherService : 구매 요청
+deactivate UserService
+activate VoucherService
+VoucherService -> EventBus : 구매 요청
+deactivate VoucherService
+activate EventBus
+EventBus -> ManagerSystem : 구매 요청
+deactivate EventBus
+activate ManagerSystem
+ManagerSystem -> DB : 사용자 구매 이력 조회
+deactivate ManagerSystem
+activate DB
+DB -->> ManagerSystem : 당월 누적 구매액
+activate ManagerSystem
+deactivate DB
+ManagerSystem -> ManagerSystem : 지역 정책 대비 구매 한도 검증
+
+alt 구매 한도 이내
+  ManagerSystem -->> EventBus : 결제 요청
+  deactivate ManagerSystem
+  activate EventBus
+  EventBus -> PaymentService : 결제 요청 전달
+  deactivate EventBus
+  activate PaymentService
+  PaymentService -> FinancialSystem : 결제 정보 전달
+  deactivate PaymentService
+  activate FinancialSystem
+  FinancialSystem -->> PaymentService : 결제 승인
+  deactivate FinancialSystem
+  activate PaymentService
+  PaymentService -->> EventBus : 결제 결과 반환
+  deactivate PaymentService
+  activate EventBus
+  EventBus -->> VoucherService : 결제 결과 반환
+  activate VoucherService
+  deactivate EventBus
+  VoucherService -->> UserService : 구매 완료 (갱신 잔액)
+  activate UserService
+  deactivate VoucherService
+  UserService -->> User : 구매 결과 표시
+  deactivate UserService
+else 구매 한도 초과
+  activate ManagerSystem
+  ManagerSystem -->> EventBus : 결제 거절
+  deactivate ManagerSystem
+  activate EventBus
+  EventBus -->> VoucherService : 거절 사유 반환
+  activate VoucherService
+  deactivate EventBus
+  VoucherService -->> UserService : 거절 사유 반환
+  activate UserService
+  deactivate VoucherService
+  UserService -->> User : 한도 초과 안내
+  deactivate UserService
+end
+
+@enduml

@@ -1,0 +1,123 @@
+@startuml eventbus_structure_decomposition
+
+title EventBus Decomposition - Structure View
+
+top to bottom direction
+
+skinparam style strictuml
+skinparam shadowing false
+skinparam defaultFontName Malgun Gothic
+skinparam defaultFontSize 12
+skinparam packageStyle folder
+skinparam classAttributeIconSize 0
+
+skinparam linetype polyline
+
+skinparam nodesep 45
+skinparam ranksep 50
+
+skinparam classBackgroundColor White
+skinparam classBorderColor #444444
+skinparam packageBackgroundColor White
+skinparam packageBorderColor #444444
+skinparam ArrowColor #444444
+
+hide circle
+hide empty fields
+
+package "EventBus" as EventBus {
+
+    package "EventReception" as Reception {
+
+        class "EventReceiver\n(from EventReception)" as EventReceiver {
+            +sendEvent(message : EventMessage) : void
+            +publish(message : EventMessage) : void
+        }
+    }
+
+    package "EventRouting" as Routing {
+
+        class "EventRouter\n(from EventRouting)" as EventRouter {
+            +route(message : EventMessage) : void
+        }
+
+        class "SubscriptionRegistry\n(from EventRouting)" as SubscriptionRegistry {
+            +register(messageType : String, target : ISubscriber) : void
+            +unregister(messageType : String, target : ISubscriber) : void
+            +findSubscribers(messageType : String) : List<ISubscriber>
+        }
+    }
+
+    package "EventDispatch" as Dispatch {
+
+        class "EventDispatcher\n(from EventDispatch)" as EventDispatcher {
+            +dispatch(message : EventMessage, targets : List<ISubscriber>) : void
+        }
+    }
+
+    package "MessageModel" as MessageModel {
+
+        class "EventMessage\n(from MessageModel)" as EventMessage {
+            +messageType : String
+            +correlationId : String
+            +payload : Object
+        }
+    }
+
+    package "ServiceInterface" as ServiceInterfaces #FFFF99 {
+
+        class "ManagerSystemAdapter\n(from ServiceInterface)" as ManagerAdapter {
+            +handle(message : EventMessage) : void
+        }
+
+        class "SearchServiceAdapter\n(from ServiceInterface)" as SearchAdapter {
+            +handle(message : EventMessage) : void
+        }
+
+        class "VoucherServiceAdapter\n(from ServiceInterface)" as VoucherAdapter {
+            +handle(message : EventMessage) : void
+        }
+
+        class "PaymentServiceAdapter\n(from ServiceInterface)" as PaymentAdapter {
+            +handle(message : EventMessage) : void
+        }
+
+        interface "ISubscriber\n(from ServiceInterface)" as ISubscriber {
+            +handle(message : EventMessage) : void
+        }
+    }
+}
+
+EventReceiver .down.> EventRouter : route
+
+EventRouter .right.> SubscriptionRegistry : findSubscribers()
+
+EventRouter .down.> EventDispatcher : dispatch
+
+EventDispatcher .right.> ISubscriber : handle
+
+EventReceiver ..> EventMessage : 메시지 타입
+
+ManagerAdapter .down.|> ISubscriber
+SearchAdapter .down.|> ISubscriber
+VoucherAdapter .down.|> ISubscriber
+PaymentAdapter .down.|> ISubscriber
+
+Reception -[hidden]down-> Routing
+Routing -[hidden]down-> Dispatch
+Dispatch -[hidden]down-> MessageModel
+
+Routing -[hidden]right-> ServiceInterfaces
+EventReceiver -[hidden]right-> ManagerAdapter
+
+ManagerAdapter -[hidden]down-> SearchAdapter
+SearchAdapter -[hidden]down-> VoucherAdapter
+VoucherAdapter -[hidden]down-> PaymentAdapter
+PaymentAdapter -[hidden]down-> ISubscriber
+
+ManagerAdapter ..> SubscriptionRegistry : register
+SearchAdapter ..> SubscriptionRegistry : register
+VoucherAdapter ..> SubscriptionRegistry : register
+PaymentAdapter ..> SubscriptionRegistry : register
+
+@enduml

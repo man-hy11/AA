@@ -1,0 +1,38 @@
+@startuml
+skinparam style strictuml
+
+actor MerchantOwner
+participant ":Controller" as Controller
+participant ":Merchant" as Merchant
+participant ":SalesAggregate" as Sales
+
+MerchantOwner -> Controller : getCustomerAgeGroup(merchantId : String, startDate : DateTime, endDate : DateTime)
+activate Controller
+
+loop up to 5 times
+    Controller -> Merchant : getCustomerAgeGroup(merchantId : String, startDate : DateTime, endDate : DateTime)
+    activate Merchant
+
+    Merchant -> Sales : getCustomerAgeGroup(startDate : DateTime, endDate : DateTime)
+    activate Sales
+
+    Sales -> Sales : collectCustomerAgeGroup(startDate : DateTime, endDate : DateTime)
+
+    Sales -->> Merchant : ageGroup : Map<AgeGroup, Integer>
+    deactivate Sales
+
+    Merchant -->> Controller : ageGroup : Map<AgeGroup, Integer>
+    deactivate Merchant
+
+    break ageGroup.empty() != true
+        Controller -->> MerchantOwner : ageGroup : Map<AgeGroup, Integer>
+    end
+end
+
+opt ageGroup.empty() == true
+    Controller -->> MerchantOwner : ageGroup : Map<AgeGroup, Integer>
+    note right of MerchantOwner : return empty list and display error page
+    deactivate Controller
+end
+
+@enduml

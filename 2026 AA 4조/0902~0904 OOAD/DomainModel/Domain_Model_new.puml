@@ -1,0 +1,83 @@
+@startuml
+skinparam style strictuml
+title Domain Model
+
+left to right direction
+hide methods
+hide circle
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam ranksep 100
+skinparam nodesep 50
+
+class "회원" as Member {
+  이름
+  유형
+}
+
+class "상품권 지갑" as VoucherWallet {
+  잔액
+}
+
+class "가맹점 결제 내역" as VoucherTransaction {
+  거래금액
+  거래일시
+  거래유형
+}
+
+class "상품권 구매 내역" as PaymentTransaction {
+  거래금액
+  거래일시
+  거래유형
+}
+
+class "상품권 발행 정책" as VoucherIssuancePolicy {
+  유효일시
+  발행한도
+}
+
+class "가맹점" as Merchant {
+  사업자등록번호
+  가맹점명
+  상태
+}
+
+class "매출 집계" as SalesAggregate {
+  날짜
+  금액
+}
+
+Member "1" --> "0..1" VoucherWallet : 보유
+Member "1" --> "0..*" Merchant : 소유 및 운영
+Member "1" --> "0..*" VoucherIssuancePolicy : 관리
+
+VoucherWallet "1" --> "0..*" VoucherTransaction : 구매 내역 반영
+VoucherWallet "1" --> "0..*" PaymentTransaction : 구매 내역 반영
+
+Merchant "1" --> "0..*" VoucherTransaction : 승인한 결제 내역 반영
+Merchant "1" --> "0..*" SalesAggregate : 매출 통계
+SalesAggregate "1" --> "0..*" VoucherTransaction : 내역 확인 및 탐색
+
+note bottom of Member
+  회원유형
+  - 사용자
+  - 지역 상품권 관리자
+  - 가맹점주
+end note
+
+note bottom of VoucherTransaction
+  거래유형
+  - 상품권 결제
+  - 상품권 결제 취소/환불
+end note
+
+note bottom of PaymentTransaction
+  거래유형
+  - 상품권 구매
+  - 상품권 구매 취소
+end note
+
+@enduml

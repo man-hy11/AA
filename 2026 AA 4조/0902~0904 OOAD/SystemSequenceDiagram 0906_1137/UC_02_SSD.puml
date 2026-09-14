@@ -1,0 +1,29 @@
+@startuml
+skinparam style strictuml
+
+actor "사용자" as 사용자
+participant ":플랫폼" as 플랫폼
+actor "금융 시스템" as 금융시스템
+
+
+사용자 -> 플랫폼 : 1. 결제 요청(결제 금액, 결제 수단)
+activate 플랫폼
+alt 1a. 등록된 결제 수단이 없는 경우
+    플랫폼 -->> 사용자 : 1a.1 결제 수단 누락 메시지 반환
+else
+    플랫폼 -> 금융시스템 : 2. 결제 요청(결제 금액, 결제 수단)
+    activate 금융시스템
+
+    금융시스템 -->> 플랫폼 : 3. 요청 결과 반환
+
+    deactivate 금융시스템
+
+    alt 3a. 금융 시스템에서 해당 금액이 결제 불가능한 경우
+        플랫폼 -->> 사용자 : 3a.1 잔액 부족 메시지 반환
+    else
+        플랫폼 -->> 사용자 : 4. 정상 처리 메시지 반환
+        deactivate 플랫폼
+    end
+end
+
+@enduml

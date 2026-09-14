@@ -1,0 +1,53 @@
+@startuml
+skinparam style strictuml
+
+actor User
+participant ":Controller" as Controller
+participant ":Member" as Member
+participant ":LoginInfo" as LoginInfo
+
+User-> Controller: addMember(name : String, id : String, password : String)
+activate Controller
+Controller-> Member: registerMember(name : String, id : String, password : String)
+activate Member
+Member-> LoginInfo: verifyLoginInfo(id : String, password : String)
+activate LoginInfo
+LoginInfo-> LoginInfo: setLoginInfo(id : String, password : String)
+LoginInfo-->> Member: status : RegistrationStatus
+deactivate LoginInfo
+Member -->> Controller: status : RegistrationStatus
+deactivate Member
+
+alt status == already registered
+    Controller-->> User: status=ALREADY_REGISTERED : RegistrationStatus
+    deactivate Controller
+else status == success
+    Controller-->> User: status=SUCCESS : RegistrationStatus
+    deactivate Controller
+else status == fail
+
+    loop status == fail (5)
+        Controller-->> User: status=FAIL : RegistrationStatus
+
+        User-> Controller: addMember(name : String, id : String, password : String)
+
+        Controller-> Member: registerMember(name : String, id : String, password : String)
+        activate Member
+        Member-> LoginInfo: verifyLoginInfo(id : String, password : String)
+        activate LoginInfo
+        LoginInfo-> LoginInfo: setLoginInfo(id : String, password : String)
+        LoginInfo-->> Member: status : RegistrationStatus
+        deactivate LoginInfo
+        Member -->> Controller: status : RegistrationStatus
+        deactivate Member
+    end
+
+    alt status == fail
+        Controller-->> User: status=FAIL_LIMIT_EXCEEDED : RegistrationStatus
+    else status == success
+        Controller-->> User: status=SUCCESS : RegistrationStatus
+    end
+    deactivate Controller
+end
+
+@enduml

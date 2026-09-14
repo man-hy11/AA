@@ -1,0 +1,52 @@
+@startuml
+skinparam style strictuml
+skinparam sequenceMessageAlign center
+
+actor User
+participant ":Controller" as Controller
+participant ":Customer" as Customer
+participant ":VoucherWallet" as VoucherWallet
+actor BusinessSystem
+
+User -> Controller : chargeVoucher(memberId : String, amount : int, paymentMethodType : PaymentMethodType)
+activate Controller
+
+alt paymentMethodType is invalid
+    Controller -->> User : error=true : boolean
+    deactivate Controller
+else
+
+    Controller -> BusinessSystem : checkBalance(amount : int, paymentMethodType : PaymentMethodType)
+    activate BusinessSystem
+
+    BusinessSystem -->> Controller : isValid : boolean
+    deactivate BusinessSystem
+
+    alt !isValid
+        Controller -->> User : error=true : boolean
+        deactivate Controller
+    else
+
+        Controller -> Customer : createPaymentTransaction(amount : int, paymentMethodType : PaymentMethodType)
+        activate Customer
+
+        Customer -> VoucherWallet : createPaymentTransaction(amount : int, paymentMethodType : PaymentMethodType)
+        activate VoucherWallet
+
+        create ":PaymentTransaction" as PaymentTransaction
+        VoucherWallet -> PaymentTransaction : <<create>>
+
+        VoucherWallet -> VoucherWallet : increaseBalance(amount : int)
+
+        VoucherWallet -->> Customer : isNormal : boolean
+        deactivate VoucherWallet
+
+        Customer -->> Controller : isNormal : boolean
+        deactivate Customer
+
+        Controller -->> User : isSuccess=true : boolean
+        deactivate Controller
+    end
+end
+
+@enduml

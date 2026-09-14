@@ -1,0 +1,38 @@
+@startuml
+skinparam style strictuml
+
+actor MerchantOwner
+participant ":Controller" as Controller
+participant ":Merchant" as Merchant
+participant ":SalesAggregate" as Sales
+
+MerchantOwner -> Controller : getSales(merchantId : String, periodType : SalesPeriodType, date : DateTime)
+activate Controller
+
+loop up to 5 times
+    Controller -> Merchant : getSales(merchantId : String, periodType : SalesPeriodType, date : DateTime)
+    activate Merchant
+
+    Merchant -> Sales : getSales(periodType : SalesPeriodType, date : DateTime)
+    activate Sales
+
+    Sales -> Sales : calculateSales(periodType : SalesPeriodType, date : DateTime)
+    
+    Sales -->> Merchant : sales : List<SalesRecord>
+    deactivate Sales
+
+    Merchant -->> Controller : sales : List<SalesRecord>
+    deactivate Merchant
+
+    break sales.empty() != true
+        Controller -->> MerchantOwner : sales : List<SalesRecord>
+    end
+end
+
+opt sales.empty() == true
+    Controller -->> MerchantOwner : sales : List<SalesRecord>
+    note right of MerchantOwner : return empty list and display error page
+    deactivate Controller
+end
+
+@enduml

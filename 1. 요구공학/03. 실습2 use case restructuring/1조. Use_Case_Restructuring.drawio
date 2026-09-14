@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="use-case-restructuring" name="Use Case Diagram">
+    <mxGraphModel grid="1" page="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="system" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#111111;fontSize=16;fontStyle=1;verticalAlign=top;spacingTop=10;" value="음료수 자판기 시스템" vertex="1">
+          <mxGeometry height="610" width="650" x="270" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_customer" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=15;" value="고객" vertex="1">
+          <mxGeometry height="90" width="50" x="90" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="actor_admin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fontSize=15;" value="관리자" vertex="1">
+          <mxGeometry height="90" width="50" x="90" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_buy" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=15;" value="음료수 구입" vertex="1">
+          <mxGeometry height="70" width="180" x="295" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_insufficient" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=14;" value="투입금액 부족시&lt;br&gt;처리" vertex="1">
+          <mxGeometry height="70" width="170" x="735" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_soldout" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=14;" value="음료수 재고&lt;br&gt;부족시 처리" vertex="1">
+          <mxGeometry height="70" width="180" x="695" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_cancel" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=14;" value="음료수 구매&lt;br&gt;취소시 처리" vertex="1">
+          <mxGeometry height="70" width="190" x="535" y="310" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_nochange" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=14;" value="거스름돈 없을 경우&lt;br&gt;처리" vertex="1">
+          <mxGeometry height="70" width="170" x="300" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_admin_mode" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=15;" value="관리모드로 전환" vertex="1">
+          <mxGeometry height="70" width="180" x="695" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_price" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=15;" value="음료수 가격 수정" vertex="1">
+          <mxGeometry height="70" width="180" x="320" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_report" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=15;" value="1일 거래량 출력" vertex="1">
+          <mxGeometry height="70" width="180" x="320" y="580" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_operating" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#111111;fontSize=15;" value="운영모드로 전환" vertex="1">
+          <mxGeometry height="70" width="180" x="295" y="338" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_customer_buy" edge="1" parent="1" source="actor_customer" style="endArrow=open;html=1;rounded=0;strokeColor=#111111;endFill=0;" target="uc_buy" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="assoc_admin_price" edge="1" parent="1" source="actor_admin" style="endArrow=open;html=1;rounded=0;strokeColor=#111111;endFill=0;" target="uc_price" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="extend_insufficient" edge="1" parent="1" source="uc_insufficient" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_buy" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="extend_soldout" edge="1" parent="1" source="uc_soldout" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_buy" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="extend_cancel" edge="1" parent="1" source="uc_cancel" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_buy" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="extend_nochange" edge="1" parent="1" source="uc_nochange" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_buy" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="include_price_adminmode" edge="1" parent="1" source="uc_price" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_admin_mode" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="include_report_adminmode" edge="1" parent="1" source="uc_report" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_admin_mode" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="pH3ud6HSdyeDjX480368-4" edge="1" parent="1" style="endArrow=open;html=1;rounded=0;strokeColor=#111111;endFill=0;" target="uc_report" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+            <mxPoint x="140" y="530" as="sourcePoint" />
+            <mxPoint x="387" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pH3ud6HSdyeDjX480368-5" edge="1" parent="1" source="uc_buy" style="endArrow=open;endFill=0;html=1;rounded=0;dashed=1;strokeColor=#111111;fontSize=13;" target="uc_operating" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="540" y="520" as="sourcePoint" />
+            <mxPoint x="781" y="604" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

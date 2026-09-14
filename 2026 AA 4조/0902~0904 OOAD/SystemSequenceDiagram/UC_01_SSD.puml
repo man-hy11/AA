@@ -1,0 +1,28 @@
+@startuml
+skinparam style strictuml
+
+actor User as user
+participant "플랫폼" as Platform
+
+user -> Platform : 가입을 원하는 회원 유형(사용자, 지역상품권관리자, 가맹점주)에 맞는 플랫폼의 가입 페이지에 접속
+activate Platform
+user -> Platform : 가입에 필요한 정보를 입력하고 가입 요청
+
+alt 가입 요청이 성공하면
+Platform -->> user : 가입이 완료되었음을 알림
+else 2.a 이미 가입한 상태이면
+    Platform -->> user : 이미 가입되었으니 바로 로그인하면 된다고 알림
+else
+    loop 2.b 가입 요청이 실패한 상황이면 (5)
+            Platform -->> user : 가입에 실패했으니 다시 시도하라고 재시도 요청함
+user -> Platform : 가입에 필요한 정보를 입력하고 가입 요청
+    end
+break 2.b 가입 요청이 실패한 상황이면
+Platform -->> user : 5회 연속 가입에 실패했으니 10분후 다시 시도할 수 있다고 알림
+end
+
+Platform -->> user : 가입이 완료되었음을 알림
+end
+deactivate Platform
+
+@enduml

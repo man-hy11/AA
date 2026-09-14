@@ -1,0 +1,53 @@
+@startuml
+' UC_09 상품권 발행
+skinparam style strictuml
+
+actor "지역 상품권 관리자" as Manager
+participant ":플랫폼" as Platform
+actor "금융 시스템" as Finance
+
+Manager -> Platform : 1. 상품권 발생 화면 진입
+activate Platform
+
+Platform -> Finance : 2. 금융시스템 이용 가능 확인 요청
+activate Finance
+
+Finance -->> Platform : 3. 이용가능 여부 회신
+deactivate Finance
+
+alt 3a. 금융 시스템이 정기점검 등으로 동작하지 않는 경우
+    Platform -->> Manager : 3a.1 금융 시스템 상태 및 저장 불가 안내
+else
+
+    Platform -->> Manager : 4. 상품권 발생 화면 제공
+    deactivate Platform
+
+    loop 5회 반복
+    Manager -> Platform : 5. 상품권 발행 한도 및 사용기한 입력 및 저장요청
+    activate Platform
+
+    Platform -> Finance : 6. 지차체 가용 예산 조회 요청
+    activate Finance
+
+    Finance -->> Platform : 7. 가용 예산 금액 반환
+    deactivate Finance
+
+    break 발행 한도가 가용 예산 이내인 경우
+            Platform -> Finance : 8. 예산 이체 요청
+            activate Finance
+    end
+
+        Platform -->> Manager : 8a.1 발행 한도 초과 안내
+    end
+
+    Finance -->> Platform : 9. 예산 이체 결과 반환
+    deactivate Finance
+
+    alt 이체 성공한 경우
+    Platform -->> Manager : 10. 상품권 설정 저장 완료 안내
+    else 이체 실패한 경우
+    Platform -->> Manager : 상품권 설정 저장 실패 안내
+    deactivate Platform
+    end
+end
+@enduml

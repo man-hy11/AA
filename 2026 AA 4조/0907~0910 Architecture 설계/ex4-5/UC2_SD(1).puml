@@ -1,0 +1,121 @@
+@startuml seq2_nearby_merchant_search
+title 현재 위치 기반 영업 중 가맹점 조회 - 가맹점 위치 확인
+
+skinparam style strictuml
+skinparam shadowing false
+skinparam sequenceMessageAlign left
+skinparam BoxPadding 12
+skinparam defaultFontName Malgun Gothic
+autonumber
+
+actor "사용자" as User
+participant "GPS" as GPS
+participant ":UserService" as UserService <<component>>
+participant ":SearchService" as SearchService <<component>>
+participant ":EventBus" as EventBus
+participant ":ManagerSystem" as ManagerSystem <<component>>
+database DB <<database>>
+
+participant ":LocationService" as LocationService
+actor "지도 서비스" as MAP
+
+
+== 1. 현재 위치 기반 영업 중 가맹점 조회 ==
+User -> GPS : 위치 권한 허용
+activate GPS
+GPS -->> User : 현재 좌표
+deactivate GPS
+
+User -> UserService : 주변 영업 중 가맹점 조회 (좌표, 반경, 업종)
+activate UserService
+
+UserService -> SearchService : 주변 영업 중 가맹점 조회 요청
+deactivate UserService
+activate SearchService
+
+SearchService -> EventBus : 영업 중 가맹점 조회 요청
+deactivate SearchService
+activate EventBus
+
+EventBus ->> ManagerSystem : 요청 지역 기반 영업 중 가맹점 조회
+deactivate EventBus 
+activate ManagerSystem
+
+ManagerSystem -> DB : 요청 지역 기반 영업 중 가맹점 조회
+deactivate ManagerSystem
+activate DB
+
+DB -->> ManagerSystem : 가맹점 목록 전달 (위치 정보 포함)
+activate ManagerSystem
+deactivate DB
+
+ManagerSystem -->> EventBus : 가맹점 목록 전달
+deactivate ManagerSystem
+activate EventBus
+
+EventBus ->> LocationService : 가맹점 위치 정보 확인 요청
+deactivate EventBus
+activate LocationService
+
+LocationService -> MAP : 가맹점 위치 정보 확인
+deactivate LocationService
+activate MAP
+
+MAP -->> LocationService : 가맹점 위치 정보 반환
+activate LocationService
+deactivate MAP
+
+LocationService -->> EventBus : 가맹점 위치 정보 반환
+deactivate LocationService
+activate EventBus
+
+EventBus -->> SearchService : 가맹점 정보 전달
+activate SearchService
+deactivate EventBus
+
+SearchService -->> UserService : 가맹점 정보 전달
+activate UserService
+deactivate SearchService
+
+UserService -->> User : 가맹점 목록 및 지도 표시
+deactivate UserService
+
+== 2. 특정 가맹점 위치 정보 조회 ==
+
+User -> UserService : 특정 가맹점 선택
+activate UserService
+
+UserService -> SearchService : 특정 가맹점 위치 정보 조회 요청
+deactivate UserService
+activate SearchService
+
+SearchService -> EventBus : 가맹점 위치 정보 조회 요청
+deactivate SearchService
+activate EventBus
+
+EventBus ->> ManagerSystem : 가맹점 위치 정보 조회
+deactivate EventBus
+activate ManagerSystem
+
+ManagerSystem -> DB : 가맹점 위치 정보 조회
+activate DB
+
+DB -->> ManagerSystem : 가맹점 위치 정보 반환
+deactivate DB
+
+ManagerSystem -->> EventBus : 가맹점 위치 정보 반환
+deactivate ManagerSystem
+activate EventBus
+
+EventBus -->> SearchService : 가맹점 위치 정보 반환
+activate SearchService
+deactivate EventBus
+
+SearchService -->> UserService : 가맹점 위치 정보 반환
+activate UserService
+deactivate SearchService
+
+UserService -->> User : 가맹점 위치 정보 반환
+deactivate UserService
+
+@enduml

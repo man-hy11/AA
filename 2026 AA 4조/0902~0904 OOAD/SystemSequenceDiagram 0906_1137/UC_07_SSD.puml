@@ -1,0 +1,23 @@
+@startuml
+skinparam style strictuml
+
+actor "가맹점주" as Owner
+participant ":플랫폼" as System
+
+Owner -> System : 1. 실시간 매출 정보 요청
+activate System
+
+loop 2a. 매출 정보가 유효하지 않은 경우 최대 5회 반복
+    System -> System : 2. 실시간 매출 정보 수집 및 계산
+
+    break 매출 정보가 유효한 경우
+        System -->> Owner : 3. 실시간 매출 정보 전송
+    end
+end
+
+opt 2b. 5회 모두 매출 정보가 유효하지 않은 경우
+    System -->> Owner : 2b.1 에러 페이지 전송
+    deactivate System
+end
+
+@enduml

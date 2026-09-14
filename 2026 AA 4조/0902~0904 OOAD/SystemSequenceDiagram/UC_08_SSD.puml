@@ -1,0 +1,31 @@
+@startuml
+skinparam style strictuml
+
+actor "User" as User
+participant ": 플랫폼" as Platform
+activate User
+User -> Platform : 결제 내역 조회 페이지에 접속
+
+
+activate Platform
+
+Platform -->> User : 결제 내역을 보여줌
+deactivate Platform
+
+
+
+User <- User : 결제 취소 및 환불이 필요한 결제건을 선택
+
+User -> Platform : 취소 및 환불 요청
+
+activate Platform
+
+
+alt 3.a 이미 환불 처리된 결제건인 경우
+    Platform -->> User : 이미 환불되었음을 알림
+else
+    Platform -->> User : 취소 및 환불 결과를 보여줌
+end
+deactivate Platform
+
+@enduml

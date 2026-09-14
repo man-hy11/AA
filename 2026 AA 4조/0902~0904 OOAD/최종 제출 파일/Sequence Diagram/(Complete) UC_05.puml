@@ -1,0 +1,67 @@
+@startuml  
+  
+skinparam style strictuml  
+  
+actor User  
+participant ":Controller" as Controller  
+participant ":Customer" as Customer  
+participant ":VoucherWallet" as VoucherWallet  
+participant ":Merchant" as Merchant
+participant ":SalesAggregate" as Sales
+
+User -> Controller: payVoucher(merchantId : String, amount : int)
+activate Controller  
+  
+Controller -> Customer: hasSufficientBalance(amount : int)
+activate Customer  
+  
+Customer -> VoucherWallet: hasSufficientBalance(amount : int)
+activate VoucherWallet  
+VoucherWallet -->> Customer: isSufficientBalance : boolean  
+deactivate VoucherWallet  
+  
+Customer -->> Controller: isSufficientBalance : boolean  
+  
+opt isSufficientBalance  
+  
+    Controller -> Merchant: validateMerchant()
+    activate Merchant  
+    Merchant -->> Controller: isValidMerchant : boolean  
+    deactivate Merchant  
+  
+    opt isValidMerchant  
+ 
+        Controller -> Customer: decreaseBalance(amount : int)
+        
+        Customer -> VoucherWallet: decreaseBalance(amount : int)
+        activate VoucherWallet  
+
+        create ":VoucherTransaction" as VoucherTransaction
+        VoucherWallet -> VoucherTransaction: <<create>>
+        activate VoucherTransaction
+        deactivate VoucherTransaction
+
+        VoucherWallet -->> Customer: voucherTransaction : VoucherTransaction
+        deactivate VoucherWallet
+
+        Customer -->> Controller: voucherTransaction : VoucherTransaction 
+        
+        Controller -> Merchant: addVoucherTransaction(voucherTransaction : VoucherTransaction)
+        activate Merchant
+
+        Merchant -> Sales: addTransaction(transaction : VoucherTransaction)
+        activate Sales
+        deactivate Sales
+
+        deactivate Merchant
+ 
+    end  
+  
+end  
+  
+deactivate Customer  
+  
+Controller -->> User: isSuccess : boolean  
+deactivate Controller  
+  
+@enduml

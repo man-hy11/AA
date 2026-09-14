@@ -1,0 +1,38 @@
+@startuml
+skinparam style strictuml
+
+actor User
+participant ":Controller" as Controller
+participant ":Customer" as Customer
+participant ":VoucherWallet" as VoucherWallet
+
+User -> Controller : showTransactionHistory(memberId : String)
+activate Controller
+
+Controller -> Customer : showTransactionHistory()
+activate Customer
+
+Customer -> VoucherWallet : getPaymentTransactionList()
+activate VoucherWallet
+VoucherWallet -->> Customer : paymentTransactionList:List<PaymentTransaction>
+deactivate VoucherWallet
+
+Customer -> VoucherWallet : getVoucherTransactionList()
+activate VoucherWallet
+VoucherWallet -->> Customer : voucherTransactionList:List<VoucherTransaction>
+deactivate VoucherWallet
+
+
+Customer -->> Controller : transactionList:List<Transaction>
+deactivate Customer
+
+alt transactionList.empty() == true
+    Controller -->> User : transactionList : List<Transaction>
+    note right of User : 사용 내역이 존재하지 않음을 표시
+else
+    Controller -->> User : transactionList : List<Transaction>
+end
+
+deactivate Controller
+
+@enduml

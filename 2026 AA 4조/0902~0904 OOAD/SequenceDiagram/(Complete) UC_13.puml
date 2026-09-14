@@ -1,0 +1,39 @@
+@startuml 
+
+skinparam style strictuml 
+ 
+actor "LocalGovernmentAdmin" as Admin 
+participant ":Controller" as Controller 
+participant ":Merchant" as Merchant 
+ 
+Admin -> Controller: getMerchantList()
+activate Controller 
+Controller -->> Admin: merchantList : List<Merchant> 
+
+opt merchantList != null && !merchantList.isEmpty()
+ 
+    Admin -> Controller: getMerchantStatusAndDistribution(selectedMerchants : List<Merchant>)
+ 
+    loop each merchant : selectedMerchants 
+ 
+        Controller -> Merchant: getStatus()
+        activate Merchant 
+        Merchant -->> Controller: status : MerchantStatus 
+        deactivate Merchant 
+         
+        opt status is approval
+            Controller -> Merchant: getSalesList()
+            activate Merchant
+            Merchant -->> Controller: salesList : List<SalesAggregate>
+            deactivate Merchant
+        end
+    end
+
+    Controller -> Controller: calculateMerchantStatusDistribution(\nstatusList : List<MerchantStatus>,\nsalesLists : List<List<SalesAggregate>>)
+    Controller -->> Admin: merchantStatusDistribution : List<MerchantStatusDistribution> 
+ 
+end 
+ 
+deactivate Controller 
+ 
+@enduml

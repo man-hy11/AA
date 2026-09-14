@@ -1,0 +1,36 @@
+@startuml
+' UC_10 가맹점 관리(승인/해지)
+
+
+skinparam style strictuml
+
+actor LocalGovernmentAdmin
+participant ":Controller" as Controller
+participant ":Merchant" as Merchant
+
+LocalGovernmentAdmin -> Controller : getMerchantsPendingApproval(memberId : String)
+activate Controller
+
+Controller -->> LocalGovernmentAdmin : merchantList : List<Merchant>
+deactivate Controller
+LocalGovernmentAdmin -> Controller : requestMerchantApprovalDecision(merchantList : List<Merchant>, approvalList : List<boolean>)
+activate Controller
+loop : each merchantList
+Controller -> Merchant : saveStatus(approval : boolean)
+activate Merchant
+Merchant -->> Controller :  isSuccess : boolean
+deactivate Merchant
+Controller -> Controller : addResult(isSuccess : boolean)
+end
+
+Controller -> Controller : checkAllSuccess(resultList : List<boolean>) : boolean
+
+alt checkAllSuccess
+    Controller -->> LocalGovernmentAdmin : merchantList : List<Merchant>
+else 
+    Controller -->> LocalGovernmentAdmin : merchantList : List<Merchant>
+    note right of LocalGovernmentAdmin : 반영되지 않은 가맹점이 있음을 알림
+end
+deactivate Controller
+
+@enduml

@@ -1,0 +1,90 @@
+@startuml
+title 지역상품권 결제 플랫폼 Domain Model
+
+left to right direction
+hide methods
+hide circle
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam ranksep 100
+skinparam nodesep 50
+
+class Member {
+  이름
+  회원유형
+}
+
+class LoginInfo {
+  로그인정보
+}
+
+class VoucherWallet {
+  잔액
+}
+
+class VoucherTransaction {
+  거래금액
+  거래일시
+  거래유형
+}
+
+class PaymentTransaction {
+  거래금액
+  거래일시
+  거래유형
+}
+
+class Merchant {
+  사업자등록번호
+  가맹점명
+  상태
+}
+
+class MerchantApplication {
+  신청일시
+  처리상태
+  처리사유
+}
+
+class SalesAggregate {
+  집계기준일
+  결제금액
+}
+
+
+Member "1" -- "1" LoginInfo : 로그인
+
+Member "1" -- "1" VoucherWallet : 보유
+
+VoucherWallet "1" -- "0..*" VoucherTransaction : 잔액 반영
+
+Member "1" -- "0..*" Merchant : 소유 / 운영
+Member "1" -- "0..*" MerchantApplication : 신청
+MerchantApplication "0..*" -- "1" Merchant : 신청 대상
+Merchant "1" -- "0..*" VoucherTransaction : 결제 / 환불 대상
+Merchant "1" -- "0..*" SalesAggregate : 매출
+SalesAggregate -- VoucherTransaction : 거래 집계
+
+PaymentTransaction "0..*" -- "1" VoucherWallet : 결제 내역 반영
+
+note bottom of VoucherTransaction
+  거래유형
+  - 상품권을 사용한 결제
+  - 상품권을 사용한 결제 취소 / 환불
+end note
+
+note bottom of PaymentTransaction
+  거래유형
+  - 상품권 구매
+  - 상품권 구매 취소
+end note
+
+note bottom of Member
+  회원유형
+  - 사용자
+  - 지역 상품권 관리자
+  - 가맹점주
+end note
+@enduml

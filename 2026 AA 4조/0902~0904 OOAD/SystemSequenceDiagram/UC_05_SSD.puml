@@ -1,0 +1,28 @@
+@startuml
+skinparam style strictuml
+actor "사용자" as 사용자
+participant ":플랫폼" as Platform
+
+activate 사용자
+
+사용자 -> Platform: 1. 지역상품권 결제 요청
+activate Platform
+
+Platform -> Platform: 2. 지역 상품권 잔액과 가맹점 유효성 확인
+
+alt 2.a 결제 가능한 잔액이 없는 경우
+    Platform -->> 사용자: 2.a.1 잔액이 부족함을 알림
+else
+    alt 2.b 가맹점 정보가 유효하지 않은 경우
+        Platform -->> 사용자: 2.b.1 가맹점 정보가 유효하지 않음을 알림
+    else
+        Platform -> Platform: 3. 결제 금액 차감 및 결제 내역 기록
+        Platform -->> 사용자: 4. 결제 완료 알림
+    end
+    
+
+end
+deactivate Platform
+deactivate 사용자
+
+@enduml

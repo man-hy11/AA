@@ -1,0 +1,215 @@
+@startuml
+skinparam style strictuml
+title Class Diagram
+
+top to bottom direction
+
+skinparam dpi 150
+skinparam monochrome true
+skinparam shadowing false
+skinparam roundcorner 10
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+skinparam nodesep 55
+skinparam ranksep 65
+
+skinparam class {
+    BackgroundColor White
+    BorderColor Black
+    ArrowColor Black
+    FontColor Black
+    FontSize 13
+}
+
+skinparam package {
+    BorderColor Gray
+    FontColor Black
+}
+
+' ========================
+' 회원 영역
+' ========================
+
+class Controller {
+    - memberList : List<Member>
+    - merchantList : List<Merchant>
+    - businessSystem : BusinessSystem
+
+    --
+    + chargeVoucher(memberId : String, amount : int, paymentMethodType : PaymentMethodType) : boolean
+    + payVoucher(merchantId : String, amount : int) : boolean
+    + addMember(name : String, id : String, password : String) : RegistrationStatus
+    + getMerchantList() : List<Merchant>
+    + showVoucherTransactonList() : List<VoucherTransaction>
+    + requestMerchantApprovalDecision(merchantList : List<Merchant>, approvalList : List<boolean>) : List<Merchant>
+    + getMerchantsPendingApproval(memberId : String) : List<Merchant>
+    - addResult(isSuccess : boolean) : void
+    - checkAllSuccess(resultList : List<boolean>) : boolean
+    + getSales(merchantId : String, periodType : SalesPeriodType, date : DateTime) : List<SalesRecord>
+    + showTransactionHistory(memberId : String) : List<String>
+    + cancelVoucherTransacton(transactionId : String) : boolean
+    + getCustomerAgeGroup(merchantId : String, startDate : DateTime, endDate : DateTime) : Map<AgeGroup, Integer>
+    + getMerchantStatusAndDistribution(selectedMerchants : List<Merchant>) : List<MerchantStatusDistribution>
+    + calculateMerchantStatusDistribution(statusList : List<MerchantStatus>, salesLists : List<List<SalesAggregate>>) : List<MerchantStatusDistribution>
+}
+
+package "금융 시스템" {
+    class BusinessSystem {
+        --
+        + checkBalance(amount : int, paymentMethodType : PaymentMethodType) : boolean
+    }
+}
+
+package "회원 관리" {
+    abstract class Member <<abstract>> {
+        - memberId : String
+        - name : String
+        - loginInfo : LoginInfo
+        --
+        + registerMember(name : String, id : String, password : String) : RegistrationStatus
+        + login(id : String, password : String) : boolean
+    }
+
+    class Customer {
+        - ageGroup : AgeGroup
+        - voucherWalletList : List<VoucherWallet>
+        --
+        + createPaymentTransaction(amount : int, paymentMethodType : PaymentMethodType) : boolean
+        + showTransactionHistory() : List<String>
+        + hasSufficientBalance(amount : int) : boolean
+        + decreaseBalance(amount : int) : VoucherTransaction
+    }
+
+    class MerchantOwner {
+        - merchantList : List<Merchant>
+        --
+    }
+
+    class LocalGovernmentAdmin {
+        - localId : String
+        - voucherIssuancePolicyList : List<VoucherIssuancePolicy>
+        --
+    }
+
+    class LoginInfo {
+        - id : String
+        - password : String
+        --
+        + setLoginInfo(id : String, password : String) : RegistrationStatus
+        + verifyLoginInfo(id : String, password : String) : RegistrationStatus
+    }
+}
+
+' ========================
+' 상품권 / 거래 영역
+' ========================
+
+package "상품권 및 거래" {
+    class VoucherWallet {
+        - voucherTransactionList : List<VoucherTransaction>
+        - paymentTransactionList : List<PaymentTransaction>
+        - walletId : String
+        - localId : String
+        - balance : int
+        --
+        + createPaymentTransaction(amount : int, paymentMethodType : PaymentMethodType) : boolean
+        + hasSufficientBalance(amount : int) : boolean
+        + increaseBalance(amount : int) : void
+        + decreaseBalance(amount : int) : VoucherTransaction
+        + getVoucherTransactionList() : List<VoucherTransaction>
+        + getPaymentTransactionList() : List<PaymentTransaction>
+    }
+
+    abstract class Transaction <<abstract>> {
+        - transactionId : String
+        - amount : int
+        - transactionDateTime : DateTime
+        - transactionType : TransactionType
+        - memberId : String
+        --
+    }
+
+    class VoucherTransaction {
+    }
+
+    class PaymentTransaction {
+    }
+
+    class VoucherIssuancePolicy {
+        - validDateTime : DateTime;
+        - issuanceLimit : int
+        --
+    }
+}
+
+' ========================
+' 가맹점 영역
+' ========================
+
+package "가맹점 관리" {
+    class Merchant {
+        - merchantId : String
+        - businessRegistrationNumber : String
+        - merchantName : String
+        - status : MerchantStatus
+        - salesAggregateList : List<SalesAggregate>
+        --
+        + validateMerchant() : boolean
+        + saveStatus(approval : boolean): boolean
+        + getSalesList() : List<SalesAggregate>
+        + getVoucherTransactionList() : List<VoucherTransaction>
+        + addVoucherTransaction(voucherTransaction : VoucherTransaction) : void
+        + removeVoucherTransaction(transactionId : String) : boolean
+        + getCustomerAgeGroup(merchantId : String, startDate : DateTime, endDate : DateTime) : Map<AgeGroup, Integer>
+        + getStatus() : MerchantStatus
+        + getSales(periodType : SalesPeriodType, date : DateTime) : List<SalesRecord>
+
+    }
+
+    class SalesAggregate {
+        - voucherTransactionList : List<VoucherTransaction>
+        - aggregateDate : DateTime
+        --
+        - calculateSales(periodType : SalesPeriodType, date : DateTime) : void
+        - collectCustomerAgeGroup(startDate : DateTime, endDate : DateTime) : void
+        + addTransaction(transaction : VoucherTransaction) : void
+        + getTransactionList() : List<VoucherTransaction>
+        + getSales(periodType : SalesPeriodType, date : DateTime) : List<SalesRecord>
+        + removeTransaction(transactionId : String) : boolean
+        + getCustomerAgeGroup(startDate : DateTime, endDate : DateTime) : Map<AgeGroup, Integer>
+    }
+
+    class SalesRecord {
+        - period : String
+        - amount : int
+    }
+}
+
+' Composition
+Member *--> LoginInfo
+Customer "1" *--> "0..*" VoucherWallet
+Merchant "1" *--> "0..*" SalesAggregate
+Controller "1" *--> "0..*" Member
+LocalGovernmentAdmin "1" *--> "0..*" VoucherIssuancePolicy
+
+' Aggregation
+SalesAggregate "1" o--> "0..*" VoucherTransaction
+Controller "1" o--> "0..*" Merchant
+MerchantOwner "1" o--> "0..*" Merchant
+
+' Association
+VoucherWallet "1" --> "0..*" VoucherTransaction
+PaymentTransaction "0..*" <-- "1" VoucherWallet
+Controller --> BusinessSystem
+
+' Dependency (기존 유지)
+SalesAggregate ..> SalesRecord
+
+' Realization
+LocalGovernmentAdmin --|> Member
+Customer --|> Member
+MerchantOwner --|> Customer
+PaymentTransaction --|> Transaction
+VoucherTransaction --|> Transaction
+
+@enduml

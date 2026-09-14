@@ -1,0 +1,41 @@
+@startuml
+
+hide footbox
+skinparam style strictuml
+
+actor User
+participant ":Controller" as Controller
+participant ":Merchant" as Merchant
+participant ":SalesAggregate" as SalesAggregate
+
+User -> Controller : showVoucherTransactionList()
+activate Controller
+Controller -> Merchant : getVoucherTransactionList()
+activate Merchant
+Merchant -> SalesAggregate : getTransactionList()
+activate SalesAggregate
+SalesAggregate -->> Merchant : List<VoucherTransaction>
+deactivate SalesAggregate
+Merchant -->> Controller : List<VoucherTransaction>
+deactivate Merchant
+Controller -->> User : voucherTransactionList : List<VoucherTransaction>
+deactivate Controller
+User -> Controller : cancelVoucherTransaction(transactionId : String)
+activate Controller
+Controller -> Merchant : removeVoucherTransaction(transactionId : String)
+activate Merchant
+Merchant -> SalesAggregate : removeTransaction(transactionId : String)
+activate SalesAggregate
+SalesAggregate -->> Merchant : isSuccessful : boolean
+deactivate SalesAggregate
+Merchant -->> Controller : isSuccessful : boolean
+deactivate Merchant
+
+alt isSuccessful == false
+    Controller -->> User : isSuccessful : boolean
+    note right of User : 이미 환불 처리된 결제건임을 알림
+else
+    Controller -->> User : isSuccessful : boolean
+end
+
+@enduml

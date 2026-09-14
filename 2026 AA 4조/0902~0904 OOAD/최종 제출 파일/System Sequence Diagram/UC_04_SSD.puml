@@ -1,0 +1,33 @@
+@startuml
+skinparam style strictuml
+actor 사용자
+participant ":플랫폼" as Platform
+actor "금융 시스템" as Finance
+
+사용자 -> Platform: 1.상품권 구매 내역 조회 요청
+activate Platform
+Platform -->> 사용자: 2.상품권 구매 내역 표시
+deactivate Platform
+
+사용자 -> Platform: 3.취소할 구매 내역 선택 및 취소 요청
+activate Platform
+
+Platform -> Platform: 4.취소 가능 여부 확인
+
+alt 취소 가능한 경우
+    Platform -> Finance: 5.상품권 구매 취소 요청
+    activate Finance
+
+    Finance -->> Platform: 6.취소 승인
+    deactivate Finance
+
+    Platform -> Platform: 7.상품권 구매 상태를 취소 완료"로 변경
+    Platform -->> 사용자: 8.상품권 구매 취소 완료 결과 알림
+
+else 4a. 취소 불가능한 경우
+    Platform -->> 사용자: 4a.1 상품권 구매 취소 불가 결과 알림
+    deactivate Platform
+end
+
+deactivate 사용자
+@enduml
